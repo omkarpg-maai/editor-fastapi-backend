@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, posts, auth
+from routers import calendar_events
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Fastapi Template")
+    app = FastAPI(title="Editor FastAPI Backend")
 
-    app.include_router(users.router)
+    app.include_router(calendar_events.router)
    
 
     # For local development

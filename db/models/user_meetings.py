@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, Text, String, Boolean, Date, ForeignKey, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB, ENUM
 from sqlalchemy.orm import relationship
-from app.db.sessions import Base
+from db.sessions import Base
 
-
+ 
 class UserMeetings(Base):
     __tablename__ = 'UserMeetings'
     

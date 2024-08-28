@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Text, JSON, String, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB, ENUM
-from app.db.sessions import Base
+from db.sessions import Base
 
 class User(Base):
     __tablename__ = 'User'

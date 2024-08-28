@@ -3,6 +3,10 @@ from urllib.parse import urlparse, unquote
 from fastapi import HTTPException
 import httpx
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
 
 class CalendarService:
     
