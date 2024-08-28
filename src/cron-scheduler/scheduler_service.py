@@ -3,7 +3,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 import logging
 import os
 from datetime import datetime
-from app.calendar.calendar_cron_service import CalendarCronService
+from calendar.calendar_cron_service import CalendarCronService
+
 
 class SchedulerService:
     def __init__(self):

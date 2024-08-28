@@ -4,9 +4,9 @@ import json
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.db.models import User, UserMeeting
-from app.utils.redis.redis_utils import RedisManager
-from app.calendar.calendar_service import CalendarService
+from db.models import User, UserMeeting
+from utils.redis.redis_utils import RedisManager
+from calendar.calendar_service import CalendarService
 from sqlalchemy import update
 import aiohttp
 

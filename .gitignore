@@ -1,0 +1,64 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+*.egg
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.spec
+
+# mypy
+.mypy_cache/
+
+# pytest
+.cache/
+
+# Coverage reports
+.coverage
+*.cover
+*.coverage
+nosetests.xml
+coverage.xml
+*.lcov
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Docker
+Dockerfile
+docker-compose.yml
+*.dockerignore
+
+# Environment variables
+.env
+
+# Configuration files
+*.local
+
+# SQLAlchemy migration files
+alembic.ini
+versions/
+
+# Logs
+*.log
+
+# IDE specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
