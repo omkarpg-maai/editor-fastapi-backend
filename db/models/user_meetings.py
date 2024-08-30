@@ -1,15 +1,28 @@
-from sqlalchemy import Column, Integer, Text, String, Boolean, Date, ForeignKey, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB, ENUM
+from sqlalchemy import (
+    Column, Integer, String, Text, Boolean, DateTime, Date, ForeignKey, Enum, JSON, UniqueConstraint
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.schema import Sequence
+import enum
+from datetime import datetime
+
+
 from db.sessions import Base
 
- 
+# Define Enum for MeetingBotStatus if it's used
+class MeetingBotStatus(enum.Enum):
+    NOT_ADDED = 'NOT_ADDED'
+    # Add other possible values if needed
+
 class UserMeetings(Base):
     __tablename__ = 'UserMeetings'
-    
-    id = Column(Integer, primary_key=True, index=True)
-    userId = Column(Integer, ForeignKey('User.id'), nullable=False)
-    documentId = Column(String(36), ForeignKey('Document.id'))
+    __table_args__ = {'schema': 'public'}
+
+    # Columns
+    id = Column(Integer, Sequence('UserMeetings_id_seq'), primary_key=True)
+    userId = Column(Integer, ForeignKey('public."User".id', ondelete='RESTRICT', onupdate='CASCADE'), nullable=False)
+    documentId = Column(String(36), ForeignKey('public."Document".id', ondelete='SET NULL', onupdate='CASCADE'))
     calendar_uid = Column(Text, nullable=False)
     master_cal_uid = Column(Text)
     event_url = Column(Text, nullable=False)
@@ -21,14 +34,21 @@ class UserMeetings(Base):
     provider = Column(Text, nullable=False)
     disable_bot = Column(Boolean, nullable=False, default=False)
     type = Column(Text, nullable=False, default='one_time')
-    createdAt = Column(DateTime(timezone=False), server_default=func.now(), nullable=False)
-    updatedAt = Column(DateTime(timezone=False), onupdate=func.now(), nullable=False)
+    createdAt = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updatedAt = Column(DateTime, nullable=False)
     start_date = Column(Date, nullable=False)
     end_time = Column(Integer)
     uniq_identifier = Column(Text)
     Agenda = Column(Text)
     bot_id = Column(Text)
-    rough_notes = Column(JSONB)
-    bot_status = Column(ENUM('NOT_ADDED', 'ADDED', 'REMOVED', name='MeetingBotStatus'), nullable=False, default='NOT_ADDED')
+    rough_notes = Column(JSON)
+    bot_status = Column(Enum(MeetingBotStatus), nullable=False, default=MeetingBotStatus.NOT_ADDED)
 
-    user = relationship("User", back_populates="meetings")
+    # Relationships
+    user = relationship('User', backref='user_meetings')
+    document = relationship('Document', backref='user_meetings')
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint('userId', 'uniq_identifier', 'start_time', name='UserMeetings_userId_uniq_identifier_start_time_key'),
+    )

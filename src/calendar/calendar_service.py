@@ -4,9 +4,8 @@ from fastapi import HTTPException
 import httpx
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
-
-
 
 class CalendarService:
     
@@ -16,6 +15,8 @@ class CalendarService:
 
     async def connect_bot_to_event(self, event_url: str, event_start_time: str, bot_config: Dict[str, Any], transcription_options: Dict[str, Any]) -> Dict[str, Any]:
         api_url = f"{os.getenv('RECALL_API_BASE')}/v1/bot/"
+        print(f"API URL: {api_url}")
+        
         req_body = {
             "transcription_options": transcription_options,
             "chat": {
@@ -41,22 +42,28 @@ class CalendarService:
             "bot_name": bot_config.get("bot_name"),
             "join_at": event_start_time,
         }
+        print(f"Request Body: {req_body}")
 
         headers = {
             "Authorization": f"Token {os.getenv('RECALL_API_KEY')}",
         }
+        print(f"Headers: {headers}")
 
         async with httpx.AsyncClient() as client:
             try:
+                print("Sending POST request...")
                 response = await client.post(api_url, json=req_body, headers=headers)
+                print(f"Response received: {response.status_code} - {response.text}")
                 response.raise_for_status()  # Raises HTTPError for bad responses (4xx and 5xx)
                 return {"data": response.json()}
             except httpx.HTTPStatusError as e:
                 error_msg = e.response.json().get("detail", e.response.reason_phrase)
+                print(f"HTTPStatusError: {error_msg}")
                 if isinstance(error_msg, dict):
                     error_msg = error_msg.get(0, {}).get("msg", "Unknown error")
                 raise HTTPException(status_code=e.response.status_code, detail=error_msg)
             except httpx.RequestError as e:
+                print(f"RequestError: {e}")
                 raise HTTPException(status_code=500, detail=f"Request error: {e}")
 
     def get_meeting_unique_identifier_from_url(self, meeting_url: str, provider: str) -> Optional[str]:

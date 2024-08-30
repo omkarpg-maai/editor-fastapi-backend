@@ -1,18 +1,25 @@
-from sqlalchemy import Column, Integer, Text, JSON, String, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB, ENUM
-from db.sessions import Base
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'User'
-    
-    id = Column(Integer, primary_key=True, index=True)
+    __table_args__ = {'schema': 'public'}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
     displayname = Column(Text, nullable=False)
     email = Column(Text, nullable=False, unique=True)
-    tagTree = Column(JSONB, nullable=False, default={})
+    tagTree = Column(JSON, default={})
     sl_id = Column(String(36), nullable=False, unique=True)
     external_id = Column(String(36), nullable=False, unique=True)
-    provider = Column(ENUM('SUPABASE', 'GOOGLE', 'GITHUB', name='AuthenticationProvider'), nullable=False, default='SUPABASE')
+    provider = Column(String, default='SUPABASE')
     grant_id = Column(Text)
-    bot_config = Column(JSONB, nullable=False, default={"bot_name": "Supaloops.app"})
-    createdAt = Column(DateTime(timezone=False), server_default=func.now(), nullable=False)
+    bot_config = Column(JSON, default={"bot_name": "Supaloops.app"})
+    createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
     timezone = Column(Text)
+
+    # Define relationship to UserMeetings
+    meetings = relationship("UserMeetings", back_populates="user")
