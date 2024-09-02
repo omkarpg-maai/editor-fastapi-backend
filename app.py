@@ -4,10 +4,9 @@ from routers import calendar_events
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Editor FastAPI Backend")
+    app = FastAPI(title="Editor Worker FastAPI Backend")
 
     app.include_router(calendar_events.router)
-   
 
     # For local development
     origins = [

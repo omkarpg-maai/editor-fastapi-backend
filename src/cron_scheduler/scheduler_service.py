@@ -1,3 +1,4 @@
+import asyncio
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import logging
@@ -5,9 +6,7 @@ import os
 from datetime import datetime
 from src.calendar.calendar_cron_service import CalendarCronService
 from dotenv import load_dotenv
-
 from db.sessions import get_async_session
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,8 +15,8 @@ load_dotenv()
 class SchedulerService:
     def __init__(self):
         self.logger = logging.getLogger("SchedulerService")
-        self.logger.setLevel(logging.DEBUG)  # Set log level to DEBUG
-        handler = logging.StreamHandler()  # Use StreamHandler to log to console
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -37,11 +36,14 @@ class SchedulerService:
 
         self.logger.debug("CalendarCronService initialized")
 
+        self.loop = asyncio.get_event_loop()
+        self.logger.debug("Asyncio event loop retrieved")
+
         # Schedule the cron job
         self.logger.debug("Scheduling cron job")
         self.scheduler.add_job(
-            self.handle_calendar_events_cron,
-            trigger=IntervalTrigger(minutes=60),
+            self.run_async_task,
+            trigger=IntervalTrigger(seconds=10),
             id="calendarEvents",
             name="Calendar Events Cron Job",
             replace_existing=True,
@@ -51,16 +53,18 @@ class SchedulerService:
         self.scheduler.start()
         self.logger.debug("Scheduler started")
 
+    def run_async_task(self):
+        self.logger.debug("Running async task")
+        asyncio.run_coroutine_threadsafe(self.handle_calendar_events_cron(), self.loop)
+
     async def handle_calendar_events_cron(self):
         self.logger.debug("Handling calendar events cron job")
 
         if os.getenv("RUN_CALENDAR_CRON") == "true":
             self.logger.debug(f"Calendar Event cron job ran at => {datetime.now()}")
 
-        # Use async for to iterate over the async generator
         async for session in get_async_session():
             try:
-                # Pass the session to process_fetch_calendar_events
                 await self.calendar_service.process_fetch_calendar_events(session)
                 self.logger.debug("process_fetch_calendar_events method completed")
                 return True
@@ -72,3 +76,11 @@ class SchedulerService:
                 "RUN_CALENDAR_CRON environment variable is not set to 'true'"
             )
         return False
+
+    def start(self):
+        self.scheduler.start()
+        self.logger.debug("Scheduler started")
+
+    def shutdown(self):
+        self.scheduler.shutdown()
+        self.logger.debug("Scheduler stopped")
